@@ -3,7 +3,7 @@ export interface Pokemon {
     url: string;
     discovered: boolean;
     image?: string;
-    description: string;
+    description?: string;
 }
 
 export interface PokemonListResponse {
