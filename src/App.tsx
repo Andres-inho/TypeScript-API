@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
 import './App.css'
+import type { Pokemon } from './types/pokemon'
+import { fetchPokemonDetils, fetchPokemonList } from './services/pokemonServices';
+import SearchBar from './components/SearchBar';
+import PokemonList from './components/PokemonList';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+
+  useEffect(() => {
+    const load = async() => {
+      const data = await fetchPokemonList();
+      setPokemons(data);
+    }
+    load()
+  }, []);
+
+  const handleSearch = async (name: string) => {
+    try {
+      const detail = await fetchPokemonDetils(name);
+
+      setPokemons((prev) => 
+        prev.map((pokemon) =>
+          pokemon.name === name
+            ? { ...pokemon, ...detail, discovered: true }
+            : pokemon
+        )
+      );
+    } catch {
+      alert("Pokemon no encontrado");
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ padding: "20px" }}>
+      <h1>PokeAPI App</h1>
+      <SearchBar onSearch={handleSearch} />
+      <PokemonList pokemons={pokemons} />
+    </div>
+  );
 }
 
 export default App
